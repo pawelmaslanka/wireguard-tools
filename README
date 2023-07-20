@@ -1,0 +1,6 @@
+Nord Security task
+
+This README file has been created to identify what and which file has been changed as required for the Nord Security recruitment process.
+
+In this repository I placed solution for the task no. 4. The solution has been pushed into separate branch called 'nord_task'. I created two new files: @src/list_sort.h and @src/list_sort.c. They provide interface and the implementation of the merge sort algorithm dedicated for the linked list data structure. It has been used to sort peers for the 'show' command and replaced quick sort based sorting algorithm. I decided to use the merge sort algorithm because it guarantees worst-case time complexity of O(n*log(n)) and it doesn’t require any extra memory space beyond the original data structure.
+Please look at sort_peers() function in @src/show.c how this can be used.
