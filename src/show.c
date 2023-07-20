@@ -24,6 +24,11 @@
 #include "encoding.h"
 #include "subcommands.h"
 
+//TASK_CHANGE: I changed this line because it imports a function prototype
+// to sort the linked list.
+// This fulfills the requirement no. 4 from the task.
+#include "list_sort.h"
+
 static int peer_cmp(const void *first, const void *second)
 {
 	time_t diff;
@@ -43,28 +48,37 @@ static int peer_cmp(const void *first, const void *second)
 	return 0;
 }
 
-/* This, hilariously, is not the right way to sort a linked list... */
+//TASK_CHANGE: I changed this line because the linked list sorting algorithm requires
+// callbacks to work on the nodes of the list. 
+// This fulfills the requirement no. 4 from the task.
+/**
+ * Get a next peer from the passed @peer
+ * @param source The peer from which to get the next peer
+ * @return The next peer, or NULL if it was a last peer in the list
+ */
+static inline void *get_next_peer(void *peer)
+{
+	return peer ? ((struct wgpeer *) peer)->next_peer : NULL;
+}
+
+/**
+ * Link together two peers
+ * @param peer The node that is the parent of @next_peer
+ * @param next_peer: The node that is referenced from @peer
+ */
+static inline void set_next_peer(void *peer, void *next_peer)
+{
+    if (peer)
+        ((struct wgpeer *) peer)->next_peer = next_peer;
+}
+
+//TASK_CHANGE: I changed this line because it provides new approach to peers sorting.
+// This fulfills the requirement no. 4 from the task.
 static void sort_peers(struct wgdevice *device)
 {
-	size_t peer_count = 0, i = 0;
-	struct wgpeer *peer, **peers;
-
-	for_each_wgpeer(device, peer)
-		++peer_count;
-	if (!peer_count)
-		return;
-	peers = calloc(peer_count, sizeof(*peers));
-	if (!peers)
-		return;
-	for_each_wgpeer(device, peer)
-		peers[i++] = peer;
-	qsort(peers, peer_count, sizeof(*peers), peer_cmp);
-	device->first_peer = peers[0];
-	for (i = 1; i < peer_count; ++i) {
-		peers[i - 1]->next_peer = peers[i];
-	}
-	peers[peer_count - 1]->next_peer = NULL;
-	free(peers);
+	device->first_peer =
+		(struct wgpeer *) list_merge_sort((void *) device->first_peer,
+			get_next_peer, set_next_peer, peer_cmp, sizeof(struct wgpeer));
 }
 
 static char *key(const uint8_t key[static WG_KEY_LEN])
